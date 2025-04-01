@@ -457,16 +457,415 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
 }
 
 /// 수업(예약) 탭 (예시)
-class ReservationScreen extends StatelessWidget {
+class ReservationScreen extends StatefulWidget {
+  @override
+  _ReservationScreenState createState() => _ReservationScreenState();
+}
+
+class _ReservationScreenState extends State<ReservationScreen> {
+  final List<Map<String, dynamic>> _classes = [
+    {
+      'id': 1,
+      'name': '복싱 기초',
+      'instructor': '김복서',
+      'time': '09:00 - 10:00',
+      'capacity': 20,
+      'currentParticipants': 15,
+      'price': '30,000원',
+      'imageUrl': 'https://example.com/boxing_basic.jpg',
+      'description': '복싱의 기본 자세와 기술을 배우는 초급자용 수업입니다.',
+      'drills': [
+        '기본 스탠스 연습',
+        '자비 연습',
+        '스트레이트 펀치',
+        '훅 펀치',
+        '어퍼컷',
+      ],
+      'difficulty': '초급',
+      'equipment': ['복싱 장갑', '붕대', '마우스피스'],
+    },
+    {
+      'id': 2,
+      'name': '스파링',
+      'instructor': '이복서',
+      'time': '10:30 - 11:30',
+      'capacity': 15,
+      'currentParticipants': 12,
+      'price': '35,000원',
+      'imageUrl': 'https://example.com/sparring.jpg',
+      'description': '실전 스파링을 통한 전술과 방어 기술을 배우는 중급자용 수업입니다.',
+      'drills': [
+        '스파링 전술',
+        '방어 기술',
+        '카운터 펀치',
+        '클린치',
+        '스파링 매치',
+      ],
+      'difficulty': '중급',
+      'equipment': ['복싱 장갑', '붕대', '마우스피스', '헤드기어'],
+    },
+    {
+      'id': 3,
+      'name': '헤비백',
+      'instructor': '박복서',
+      'time': '14:00 - 15:00',
+      'capacity': 10,
+      'currentParticipants': 8,
+      'price': '40,000원',
+      'imageUrl': 'https://example.com/heavybag.jpg',
+      'description': '헤비백을 이용한 파워와 스피드 훈련을 하는 고급자용 수업입니다.',
+      'drills': [
+        '파워 펀치',
+        '스피드 훈련',
+        '콤비네이션',
+        '인터벌 트레이닝',
+        '파워 스트라이크',
+      ],
+      'difficulty': '고급',
+      'equipment': ['복싱 장갑', '붕대', '마우스피스', '헤비백'],
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('수업 예약'),
+        title: Text('복싱 수업 예약'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Text('수업 예약 화면', style: TextStyle(fontSize: 20)),
+      body: ListView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: _classes.length,
+        itemBuilder: (context, index) {
+          final classData = _classes[index];
+          return Card(
+            margin: EdgeInsets.only(bottom: 16),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: InkWell(
+              onTap: () => _showClassDetails(context, classData),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.red[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.fitness_center,
+                            color: Colors.red,
+                            size: 30,
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                classData['name'],
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '강사: ${classData['instructor']}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red[50],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            classData['price'],
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              classData['time'],
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.people,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              '${classData['currentParticipants']}/${classData['capacity']}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    Container(
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color:
+                        _getDifficultyColor(classData['difficulty']),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        classData['difficulty'],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty) {
+      case '초급':
+        return Colors.green;
+      case '중급':
+        return Colors.orange;
+      case '고급':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _showClassDetails(
+      BuildContext context, Map<String, dynamic> classData) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  classData['name'],
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  classData['description'],
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  '수업 정보',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 12),
+                _buildInfoRow(Icons.access_time, '시간', classData['time']),
+                _buildInfoRow(
+                    Icons.person, '강사', classData['instructor']),
+                _buildInfoRow(
+                    Icons.people,
+                    '수강 인원',
+                    '${classData['currentParticipants']}/${classData['capacity']}'),
+                _buildInfoRow(Icons.attach_money, '가격', classData['price']),
+                _buildInfoRow(Icons.fitness_center, '난이도',
+                    classData['difficulty']),
+                SizedBox(height: 24),
+                Text(
+                  '필요 장비',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: (classData['equipment'] as List<String>)
+                      .map((item) => Chip(
+                    label: Text(item),
+                    backgroundColor: Colors.red[50],
+                    labelStyle: TextStyle(color: Colors.red),
+                  ))
+                      .toList(),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  '주요 드릴',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 12),
+                ...(classData['drills'] as List<String>).map((drill) => Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle,
+                          color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Text(drill),
+                    ],
+                  ),
+                )),
+                SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showReservationDialog(context, classData);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        '예약하기',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[600]),
+          SizedBox(width: 8),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(value),
+        ],
+      ),
+    );
+  }
+
+  void _showReservationDialog(
+      BuildContext context, Map<String, dynamic> classData) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('예약 확인'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${classData['name']} 수업을 예약하시겠습니까?'),
+            SizedBox(height: 16),
+            Text('수업 시간: ${classData['time']}'),
+            Text('강사: ${classData['instructor']}'),
+            Text('가격: ${classData['price']}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // 예약 처리 로직 추가
+            },
+            child: Text('예약하기'),
+          ),
+        ],
       ),
     );
   }
