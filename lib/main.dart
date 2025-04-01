@@ -424,6 +424,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
     _controller.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -433,13 +434,29 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       ),
       body: Stack(
         children: [
+          // 카메라 피드 전체 화면
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
           ),
+          // 중앙에 네모 상자 오버레이 (스캔 영역)
+          Center(
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.red,
+                  width: 4,
+                ),
+              ),
+            ),
+          ),
+          // 하단 스캔 결과 안내 텍스트
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
+              width: double.infinity,
               padding: EdgeInsets.all(20),
               color: Colors.black54,
               child: Text(
@@ -447,6 +464,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     ? 'QR 코드를 스캔해주세요'
                     : '결과: $scannedResult',
                 style: TextStyle(color: Colors.white, fontSize: 18),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -455,6 +473,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
     );
   }
 }
+
 
 /// 수업(예약) 탭 (예시)
 class ReservationScreen extends StatefulWidget {
