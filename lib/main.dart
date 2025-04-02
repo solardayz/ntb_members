@@ -59,8 +59,6 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print(data);
-      print(response.statusCode);
       if (response.statusCode == 200 && data['token'] != null) {
         // JWT 토큰과 회원 정보 저장
         final prefs = await SharedPreferences.getInstance();
