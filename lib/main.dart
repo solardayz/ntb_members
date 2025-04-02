@@ -60,15 +60,20 @@ class _LoginPageState extends State<LoginPage> {
 
       final data = json.decode(utf8.decode(response.bodyBytes));
 
-      if (response.statusCode == 200 && data['success'] == true) {
-        // JWT 토큰 저장
+      if (response.statusCode == 200 && data['token'] != null) {
+        // JWT 토큰과 회원 정보 저장
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('jwt_token', data['token']);
-        await prefs.setString('member_name', data['memberName']);
+        await prefs.setString('member_name', data['username']);
+        await prefs.setString('member_id', data['memberId'].toString());
+        await prefs.setString('email', data['email']);
+        await prefs.setString('phone_number', data['phoneNumber']);
+        await prefs.setString('address', data['address']);
+        await prefs.setString('age', data['age']);
 
         // 로그인 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('환영합니다, ${data['memberName']}님!')),
+          SnackBar(content: Text('환영합니다, ${data['username']}님!')),
         );
 
         // 홈스크린으로 이동
