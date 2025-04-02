@@ -60,7 +60,10 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('환영합니다, ${data['memberName']}님!')),
         );
-        // TODO: 메인 화면으로 이동
+        // 홈스크린으로 이동
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       } else {
         // 로그인 실패
         ScaffoldMessenger.of(context).showSnackBar(
