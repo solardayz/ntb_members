@@ -520,7 +520,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '09:00 - 10:00',
       'capacity': 20,
       'currentParticipants': 15,
-      'price': '30,000원',
       'imageUrl': 'https://example.com/boxing_basic.jpg',
       'description': '복싱의 기본 자세와 기술을 배우는 초급자용 수업입니다.',
       'drills': [
@@ -540,7 +539,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '10:30 - 11:30',
       'capacity': 15,
       'currentParticipants': 12,
-      'price': '35,000원',
       'imageUrl': 'https://example.com/basic_combo.jpg',
       'description': '기본 펀치들의 다양한 콤비네이션을 배우는 초급자용 수업입니다.',
       'drills': [
@@ -560,7 +558,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '14:00 - 15:00',
       'capacity': 12,
       'currentParticipants': 8,
-      'price': '40,000원',
       'imageUrl': 'https://example.com/intermediate_combo.jpg',
       'description': '복잡한 콤비네이션과 전술을 배우는 중급자용 수업입니다.',
       'drills': [
@@ -580,7 +577,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '15:30 - 16:30',
       'capacity': 10,
       'currentParticipants': 6,
-      'price': '45,000원',
       'imageUrl': 'https://example.com/advanced_combo.jpg',
       'description': '전문적인 복싱 기술과 전술을 배우는 고급자용 수업입니다.',
       'drills': [
@@ -600,7 +596,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '17:00 - 18:00',
       'capacity': 8,
       'currentParticipants': 6,
-      'price': '50,000원',
       'imageUrl': 'https://example.com/sparring.jpg',
       'description': '실전 스파링을 통한 전술과 방어 기술을 배우는 중급자용 수업입니다.',
       'drills': [
@@ -620,7 +615,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '18:30 - 19:30',
       'capacity': 10,
       'currentParticipants': 7,
-      'price': '40,000원',
       'imageUrl': 'https://example.com/heavybag.jpg',
       'description': '헤비백을 이용한 파워와 스피드 훈련을 하는 고급자용 수업입니다.',
       'drills': [
@@ -640,7 +634,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '20:00 - 21:00',
       'capacity': 15,
       'currentParticipants': 10,
-      'price': '35,000원',
       'imageUrl': 'https://example.com/boxing_fitness.jpg',
       'description': '복싱을 통한 체력 향상과 다이어트를 위한 수업입니다.',
       'drills': [
@@ -660,7 +653,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
       'time': '10:00 - 11:00',
       'capacity': 12,
       'currentParticipants': 8,
-      'price': '35,000원',
       'imageUrl': 'https://example.com/women_boxing.jpg',
       'description': '여성만을 위한 맞춤형 복싱 수업입니다.',
       'drills': [
@@ -737,23 +729,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
                             ],
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red[50],
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            classData['price'],
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -796,11 +771,9 @@ class _ReservationScreenState extends State<ReservationScreen> {
                     ),
                     SizedBox(height: 12),
                     Container(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color:
-                        _getDifficultyColor(classData['difficulty']),
+                        color: _getDifficultyColor(classData['difficulty']),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -835,8 +808,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
     }
   }
 
-  void _showClassDetails(
-      BuildContext context, Map<String, dynamic> classData) {
+  void _showClassDetails(BuildContext context, Map<String, dynamic> classData) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -891,13 +863,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 ),
                 SizedBox(height: 12),
                 _buildInfoRow(Icons.access_time, '시간', classData['time']),
-                _buildInfoRow(
-                    Icons.person, '강사', classData['instructor']),
+                _buildInfoRow(Icons.person, '강사', classData['instructor']),
                 _buildInfoRow(
                     Icons.people,
                     '수강 인원',
                     '${classData['currentParticipants']}/${classData['capacity']}'),
-                _buildInfoRow(Icons.attach_money, '가격', classData['price']),
                 _buildInfoRow(Icons.fitness_center, '난이도',
                     classData['difficulty']),
                 SizedBox(height: 24),
@@ -914,10 +884,10 @@ class _ReservationScreenState extends State<ReservationScreen> {
                   runSpacing: 8,
                   children: (classData['equipment'] as List<String>)
                       .map((item) => Chip(
-                    label: Text(item),
-                    backgroundColor: Colors.red[50],
-                    labelStyle: TextStyle(color: Colors.red),
-                  ))
+                            label: Text(item),
+                            backgroundColor: Colors.red[50],
+                            labelStyle: TextStyle(color: Colors.red),
+                          ))
                       .toList(),
                 ),
                 SizedBox(height: 24),
@@ -930,16 +900,16 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 ),
                 SizedBox(height: 12),
                 ...(classData['drills'] as List<String>).map((drill) => Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle,
-                          color: Colors.red, size: 20),
-                      SizedBox(width: 8),
-                      Text(drill),
-                    ],
-                  ),
-                )),
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle,
+                              color: Colors.red, size: 20),
+                          SizedBox(width: 8),
+                          Text(drill),
+                        ],
+                      ),
+                    )),
                 SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
@@ -999,7 +969,6 @@ class _ReservationScreenState extends State<ReservationScreen> {
             SizedBox(height: 16),
             Text('수업 시간: ${classData['time']}'),
             Text('강사: ${classData['instructor']}'),
-            Text('가격: ${classData['price']}'),
           ],
         ),
         actions: [
