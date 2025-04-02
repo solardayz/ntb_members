@@ -439,6 +439,13 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
             controller: _controller,
             onDetect: _onDetect,
           ),
+          // 스캔 영역 외 부분을 어둡게 처리
+          Container(
+            color: Colors.black54,
+            child: CustomPaint(
+              painter: ScannerOverlayPainter(),
+            ),
+          ),
           // 중앙에 네모 상자 오버레이 (스캔 영역)
           Center(
             child: Container(
@@ -474,6 +481,29 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   }
 }
 
+// 스캐너 오버레이를 그리는 CustomPainter 클래스
+class ScannerOverlayPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black54
+      ..style = PaintingStyle.fill;
+
+    // 전체 화면을 어둡게
+    canvas.drawRect(Offset.zero & size, paint);
+
+    // 스캔 영역을 투명하게
+    final scanArea = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: 300,
+      height: 300,
+    );
+    canvas.drawRect(scanArea, Paint()..blendMode = BlendMode.clear);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
 
 /// 수업(예약) 탭 (예시)
 class ReservationScreen extends StatefulWidget {
