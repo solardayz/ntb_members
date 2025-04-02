@@ -59,7 +59,8 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = json.decode(utf8.decode(response.bodyBytes));
-
+      print(data);
+      print(response.statusCode);
       if (response.statusCode == 200 && data['token'] != null) {
         // JWT 토큰과 회원 정보 저장
         final prefs = await SharedPreferences.getInstance();
@@ -69,8 +70,7 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString('email', data['email']);
         await prefs.setString('phone_number', data['phoneNumber']);
         await prefs.setString('address', data['address']);
-        await prefs.setString('age', data['age']);
-
+        await prefs.setString('age', data['age'].toString());
         // 로그인 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('환영합니다, ${data['username']}님!')),
@@ -83,7 +83,10 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         // 로그인 실패
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? '로그인에 실패했습니다.')),
+          SnackBar(
+            content: Text(data['message'] ?? '로그인에 실패했습니다.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
