@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences.dart';
 import 'dart:convert';
 
 void main() async {
@@ -56,14 +57,19 @@ class _LoginPageState extends State<LoginPage> {
         }),
       );
 
-      // UTF-8로 디코딩
       final data = json.decode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200 && data['success'] == true) {
-        // 로그인 성공
+        // JWT 토큰 저장
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('jwt_token', data['token']);
+        await prefs.setString('member_name', data['memberName']);
+
+        // 로그인 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('환영합니다, ${data['memberName']}님!')),
         );
+
         // 홈스크린으로 이동
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -1209,7 +1215,7 @@ class ProfileScreen extends StatelessWidget {
                 leading: Icon(Icons.logout, color: Colors.redAccent),
                 title: Text('로그 아웃'),
                 trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {},
+                onTap: () => logout(context),
               ),
             ],
           ),
@@ -1217,4 +1223,27 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+// API 요청에 사용할 헤더를 가져오는 함수
+Future<Map<String, String>> getAuthHeaders() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('jwt_token');
+  
+  return {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Accept': 'application/json; charset=UTF-8',
+    'Authorization': 'Bearer $token',
+  };
+}
+
+// 로그아웃 함수
+Future<void> logout(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('jwt_token');
+  await prefs.remove('member_name');
+  
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(builder: (context) => LoginPage()),
+  );
 }
