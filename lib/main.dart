@@ -263,174 +263,186 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // 상단 프로필 섹션
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(20, 60, 20, 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.red[700]!, Colors.red[500]!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final prefs = snapshot.data!;
+        final memberName = prefs.getString('member_name') ?? '회원님';
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              // 상단 프로필 섹션
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.fromLTRB(20, 60, 20, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red[700]!, Colors.red[500]!],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage:
-                      NetworkImage('https://i.pravatar.cc/300'),
-                    ),
-                    SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          '홍길동님',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundImage:
+                          NetworkImage('https://i.pravatar.cc/300'),
                         ),
-                        Text(
-                          'NTB 복싱 멤버십',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
+                        SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$memberName님',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              'NTB 복싱 멤버십',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                    SizedBox(height: 20),
+                    Text(
+                      today,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      weekday,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
-                SizedBox(height: 20),
-                Text(
-                  today,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  weekday,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 메인 컨텐츠
-          Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 오늘의 운동 통계
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '오늘의 복싱',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildStatItem(
-                              '예약 수업', '2', Icons.fitness_center),
-                          _buildStatItem(
-                              '남은 수업', '8', Icons.fitness_center),
-                          _buildStatItem('체크인', '1', Icons.check_circle),
+              ),
+              // 메인 컨텐츠
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 오늘의 운동 통계
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                // 추천 수업
-                Text(
-                  '추천 수업',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  height: 200,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _buildRecommendedClass('복싱 기초', '09:00', '김복서'),
-                      _buildRecommendedClass('스파링', '10:30', '이복서'),
-                      _buildRecommendedClass('헤비백', '14:00', '박복서'),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                // 공지사항
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '오늘의 복싱',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem(
+                                  '예약 수업', '2', Icons.fitness_center),
+                              _buildStatItem(
+                                  '남은 수업', '8', Icons.fitness_center),
+                              _buildStatItem('체크인', '1', Icons.check_circle),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '공지사항',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    SizedBox(height: 20),
+                    // 추천 수업
+                    Text(
+                      '추천 수업',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      SizedBox(height: 15),
-                      _buildNoticeItem('2024년 3월 복싱 수업 일정 안내'),
-                      _buildNoticeItem('신규 회원 복싱 장갑 제공 이벤트'),
-                      _buildNoticeItem('복싱장 시설 점검 일정 안내'),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      height: 200,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _buildRecommendedClass('복싱 기초', '09:00', '김복서'),
+                          _buildRecommendedClass('스파링', '10:30', '이복서'),
+                          _buildRecommendedClass('헤비백', '14:00', '박복서'),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // 공지사항
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '공지사항',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 15),
+                          _buildNoticeItem('2024년 3월 복싱 수업 일정 안내'),
+                          _buildNoticeItem('신규 회원 복싱 장갑 제공 이벤트'),
+                          _buildNoticeItem('복싱장 시설 점검 일정 안내'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1171,63 +1183,76 @@ class _ReservationScreenState extends State<ReservationScreen> {
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('프로필'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
-              ),
-              SizedBox(height: 16),
-              Text('홍길동',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              SizedBox(height: 32),
-              ListTile(
-                leading: Icon(Icons.payment, color: Colors.redAccent),
-                title: Text('결제현황'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {},
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.calendar_today, color: Colors.redAccent),
-                title: Text('출석 현황'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {},
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.account_circle, color: Colors.redAccent),
-                title: Text('내 계정'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {},
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.privacy_tip, color: Colors.redAccent),
-                title: Text('개인정보 정책'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {},
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.logout, color: Colors.redAccent),
-                title: Text('로그 아웃'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () => logout(context),
-              ),
-            ],
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final prefs = snapshot.data!;
+        final memberName = prefs.getString('member_name') ?? '회원님';
+        final email = prefs.getString('email') ?? '';
+        final phoneNumber = prefs.getString('phone_number') ?? '';
+        final address = prefs.getString('address') ?? '';
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+                ),
+                SizedBox(height: 16),
+                Text(memberName,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                Text(email,
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                SizedBox(height: 32),
+                ListTile(
+                  leading: Icon(Icons.payment, color: Colors.redAccent),
+                  title: Text('결제현황'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {},
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.calendar_today, color: Colors.redAccent),
+                  title: Text('출석 현황'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {},
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.account_circle, color: Colors.redAccent),
+                  title: Text('내 계정'),
+                  subtitle: Text('$phoneNumber\n$address'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {},
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.privacy_tip, color: Colors.redAccent),
+                  title: Text('개인정보 정책'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {},
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.logout, color: Colors.redAccent),
+                  title: Text('로그 아웃'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () => logout(context),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
