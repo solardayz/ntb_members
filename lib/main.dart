@@ -46,14 +46,18 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await http.post(
         Uri.parse('http://localhost:8080/api/mobile/member/login'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json; charset=UTF-8',
+        },
         body: json.encode({
           'email': _emailController.text,
           'password': _passwordController.text,
         }),
       );
 
-      final data = json.decode(response.body);
+      // UTF-8로 디코딩
+      final data = json.decode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200 && data['success'] == true) {
         // 로그인 성공
