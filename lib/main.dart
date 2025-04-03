@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:8080/api/mobile/member/login'),
+        Uri.parse('http://mange.ntbc.store/api/mobile/member/login'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept': 'application/json; charset=UTF-8',
@@ -265,6 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
 class HomeContent extends StatelessWidget {
   final String today = DateFormat('yyyy년 MM월 dd일').format(DateTime.now());
   final String weekday = DateFormat('EEEE', 'ko_KR').format(DateTime.now());
+  bool checkedInToday = false; // 서버에서 받아와야지 이건
+  int currentPoint = 120;
 
   @override
   Widget build(BuildContext context) {
@@ -281,6 +283,7 @@ class HomeContent extends StatelessWidget {
         return SingleChildScrollView(
           child: Column(
             children: [
+              buildPointBanner(checkedInToday, currentPoint),
               // 상단 프로필 섹션
               Container(
                 width: double.infinity,
@@ -577,6 +580,73 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
+
+  Widget buildPointBanner(bool checkedInToday, int currentPoint) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: checkedInToday ? Colors.green[50] : Colors.orange[50],
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(
+            checkedInToday ? Icons.check_circle : Icons.local_fire_department,
+            color: checkedInToday ? Colors.green : Colors.deepOrange,
+            size: 32,
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  checkedInToday
+                      ? '오늘 출석 완료!'
+                      : '🔥 오늘 출석하고 10P 받기!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: checkedInToday ? Colors.green[700] : Colors.orange[800],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  checkedInToday
+                      ? '현재 포인트: ${currentPoint}P'
+                      : '출석하면 포인트가 적립됩니다!',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                ),
+              ],
+            ),
+          ),
+          if (!checkedInToday)
+            ElevatedButton(
+              onPressed: () {
+                // 출석 처리 API 호출 등
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text('출석하기'),
+            ),
+        ],
+      ),
+    );
+  }
+
 }
 
 /// QR 코드 스캔 페이지 (체크인 탭)
@@ -608,7 +678,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       final phoneNumber = prefs.getString('phone_number');
 
       final response = await http.post(
-        Uri.parse('http://localhost:8080/api/mobile/attendance/check-in'),
+        Uri.parse('http://mange.ntbc.store/api/mobile/attendance/check-in'),
         headers: await getAuthHeaders(),
         body: json.encode({
           'memberId': int.parse(memberId!),
@@ -1479,7 +1549,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       final memberId = prefs.getString('member_id');
 
       final response = await http.post(
-        Uri.parse('http://localhost:8080/api/mobile/member/change-password'),
+        Uri.parse('http://mange.ntbc.store/api/mobile/member/change-password'),
         headers: await getAuthHeaders(),
         body: json.encode({
           'memberId': int.parse(memberId!),
@@ -1739,7 +1809,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       // print('회원 ID: $memberId'); // 디버깅 로그
 
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/mobile/attendance/member/$memberId'),
+        Uri.parse('http://mange.ntbc.store/api/mobile/attendance/member/$memberId'),
         headers: await getAuthHeaders(),
       );
 
@@ -1849,7 +1919,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       // print('회원 ID: $memberId');
 
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/mobile/payment/member/$memberId'),
+        Uri.parse('http://mange.ntbc.store/api/mobile/payment/member/$memberId'),
         headers: await getAuthHeaders(),
       );
 
