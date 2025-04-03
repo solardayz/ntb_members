@@ -1805,7 +1805,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   itemCount: _attendanceList.length,
                   itemBuilder: (context, index) {
                     final attendance = _attendanceList[index];
-                    print('출석 항목: $attendance'); // 디버깅 로그
+                    // print('출석 항목: $attendance'); // 디버깅 로그
                     final checkInTime = DateTime.parse(attendance['checkInTime']);
                     final formattedDate = DateFormat('yyyy년 MM월 dd일 HH:mm').format(checkInTime);
 
@@ -1846,7 +1846,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final memberId = prefs.getString('member_id');
-      print('회원 ID: $memberId');
+      // print('회원 ID: $memberId');
 
       final response = await http.get(
         Uri.parse('http://localhost:8080/api/mobile/payment/member/$memberId'),
@@ -1871,7 +1871,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         });
       }
     } catch (e) {
-      print('에러 발생: $e');
+      // print('에러 발생: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('서버 연결에 실패했습니다.')),
       );
