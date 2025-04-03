@@ -1255,9 +1255,14 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(height: 32),
                 ListTile(
                   leading: Icon(Icons.payment, color: Colors.redAccent),
-                  title: Text('결제현황'),
+                  title: Text('결제 현황'),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PaymentHistoryScreen()),
+                    );
+                  },
                 ),
                 Divider(),
                 ListTile(
@@ -1519,6 +1524,160 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         title: Text(formattedDate),
                         subtitle: Text(attendance['companyName']),
                         trailing: Text(attendance['phoneNumber']),
+                      ),
+                    );
+                  },
+                ),
+    );
+  }
+}
+
+class PaymentHistoryScreen extends StatefulWidget {
+  @override
+  _PaymentHistoryScreenState createState() => _PaymentHistoryScreenState();
+}
+
+class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
+  List<Map<String, dynamic>> _paymentList = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPaymentHistory();
+  }
+
+  Future<void> _loadPaymentHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final memberId = prefs.getString('member_id');
+      print('회원 ID: $memberId'); // 디버깅 로그
+
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/mobile/payment/member/$memberId'),
+        headers: await getAuthHeaders(),
+      );
+
+      print('서버 응답: ${response.body}'); // 디버깅 로그
+
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      print('파싱된 데이터: $data'); // 디버깅 로그
+      
+      if (response.statusCode == 200 && data['success'] == true) {
+        final List<dynamic> paymentData = data['data'];
+        print('결제 데이터: $paymentData'); // 디버깅 로그
+        
+        setState(() {
+          _paymentList = paymentData.map((item) => Map<String, dynamic>.from(item)).toList();
+          _isLoading = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? '결제 내역을 불러오는데 실패했습니다.')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('에러 발생: $e'); // 디버깅 로그
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('서버 연결에 실패했습니다.')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatAmount(int amount) {
+    return '${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원';
+  }
+
+  String _formatPaymentDate(String date) {
+    return DateFormat('yyyy년 MM월 dd일').format(DateTime.parse(date));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('결제 내역'),
+        centerTitle: true,
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _paymentList.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.payment, size: 64, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        '결제 내역이 없습니다.',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _paymentList.length,
+                  itemBuilder: (context, index) {
+                    final payment = _paymentList[index];
+                    print('결제 항목: $payment'); // 디버깅 로그
+
+                    return Card(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: payment['paymentCompleted'] 
+                              ? Colors.green[100] 
+                              : Colors.red[100],
+                          child: Icon(
+                            payment['paymentCompleted'] 
+                                ? Icons.check_circle 
+                                : Icons.pending,
+                            color: payment['paymentCompleted'] 
+                                ? Colors.green 
+                                : Colors.red,
+                          ),
+                        ),
+                        title: Text(_formatAmount(payment['amount'])),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_formatPaymentDate(payment['paymentDate'])),
+                            Text('${payment['numberOfMonths']}개월'),
+                            Text(payment['companyName']),
+                          ],
+                        ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              payment['paymentCompleted'] ? '결제완료' : '미결제',
+                              style: TextStyle(
+                                color: payment['paymentCompleted'] 
+                                    ? Colors.green 
+                                    : Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (payment['paymentDesc'].isNotEmpty)
+                              Text(
+                                payment['paymentDesc'],
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     );
                   },
