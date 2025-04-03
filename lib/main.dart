@@ -1626,22 +1626,22 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
-            print('페이지 로딩 시작: $url'); // 디버깅 로그
+            // print('페이지 로딩 시작: $url'); // 디버깅 로그
             setState(() {
               _isLoading = true;
               _hasError = false;
             });
           },
           onPageFinished: (String url) {
-            print('페이지 로딩 완료: $url'); // 디버깅 로그
+            // print('페이지 로딩 완료: $url'); // 디버깅 로그
             setState(() {
               _isLoading = false;
             });
           },
           onWebResourceError: (WebResourceError error) {
-            print('웹뷰 에러: ${error.description}');
-            print('에러 코드: ${error.errorCode}');
-            print('에러 타입: ${error.errorType}');
+            // print('웹뷰 에러: ${error.description}');
+            // print('에러 코드: ${error.errorCode}');
+            // print('에러 타입: ${error.errorType}');
             setState(() {
               _isLoading = false;
               _hasError = true;
@@ -1736,21 +1736,21 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final memberId = prefs.getString('member_id');
-      print('회원 ID: $memberId'); // 디버깅 로그
+      // print('회원 ID: $memberId'); // 디버깅 로그
 
       final response = await http.get(
         Uri.parse('http://localhost:8080/api/mobile/attendance/member/$memberId'),
         headers: await getAuthHeaders(),
       );
 
-      print('서버 응답: ${response.body}'); // 디버깅 로그
+      // print('서버 응답: ${response.body}'); // 디버깅 로그
 
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print('파싱된 데이터: $data'); // 디버깅 로그
-      
+      // print('파싱된 데이터: $data'); // 디버깅 로그
+
       if (response.statusCode == 200 && data['success'] == true) {
         final List<dynamic> attendanceData = data['data'];
-        print('출석 데이터: $attendanceData'); // 디버깅 로그
+        // print('출석 데이터: $attendanceData'); // 디버깅 로그
         
         setState(() {
           _attendanceList = attendanceData.map((item) => Map<String, dynamic>.from(item)).toList();
@@ -1765,7 +1765,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
         });
       }
     } catch (e) {
-      print('에러 발생: $e'); // 디버깅 로그
+      // print('에러 발생: $e'); // 디버깅 로그
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('서버 연결에 실패했습니다.')),
       );
