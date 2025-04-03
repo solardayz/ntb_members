@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -94,6 +95,10 @@ class _LoginPageState extends State<LoginPage> {
     } finally {
       setState(() {
         _isLoading = false;
+        // 홈스크린으로 이동
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       });
     }
   }
@@ -1277,9 +1282,14 @@ class ProfileScreen extends StatelessWidget {
                 Divider(),
                 ListTile(
                   leading: Icon(Icons.privacy_tip, color: Colors.redAccent),
-                  title: Text('개인정보 정책'),
+                  title: Text('개인정보 처리방침'),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PrivacyPolicyScreen()),
+                    );
+                  },
                 ),
                 Divider(),
                 ListTile(
@@ -1293,6 +1303,116 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class PrivacyPolicyScreen extends StatefulWidget {
+  @override
+  _PrivacyPolicyScreenState createState() => _PrivacyPolicyScreenState();
+}
+
+class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
+  late WebViewController _controller;
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.white)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {
+            print('페이지 로딩 시작: $url'); // 디버깅 로그
+            setState(() {
+              _isLoading = true;
+              _hasError = false;
+            });
+          },
+          onPageFinished: (String url) {
+            print('페이지 로딩 완료: $url'); // 디버깅 로그
+            setState(() {
+              _isLoading = false;
+            });
+          },
+          onWebResourceError: (WebResourceError error) {
+            print('웹뷰 에러: ${error.description}');
+            print('에러 코드: ${error.errorCode}');
+            print('에러 타입: ${error.errorType}');
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+            });
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://ntbc.store/privacy/privacy.html'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('개인정보 처리방침'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              _controller.reload();
+            },
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          if (_hasError)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  SizedBox(height: 16),
+                  Text(
+                    '페이지를 불러오는데 실패했습니다.',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '잠시 후 다시 시도해주세요.',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _controller.reload();
+                    },
+                    child: Text('다시 시도'),
+                  ),
+                ],
+              ),
+            )
+          else
+            WebViewWidget(controller: _controller),
+          if (_isLoading)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text(
+                    '페이지를 불러오는 중...',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
