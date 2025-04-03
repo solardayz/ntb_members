@@ -1235,6 +1235,7 @@ class ProfileScreen extends StatelessWidget {
         final email = prefs.getString('email') ?? '';
         final phoneNumber = prefs.getString('phone_number') ?? '';
         final address = prefs.getString('address') ?? '';
+        final age = prefs.getString('age') ?? '';
 
         return SingleChildScrollView(
           child: Padding(
@@ -1280,9 +1281,25 @@ class ProfileScreen extends StatelessWidget {
                 ListTile(
                   leading: Icon(Icons.account_circle, color: Colors.redAccent),
                   title: Text('내 계정'),
-                  subtitle: Text('$phoneNumber\n$address'),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyAccountScreen()),
+                    );
+                  },
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.lock, color: Colors.redAccent),
+                  title: Text('비밀번호 변경'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                    );
+                  },
                 ),
                 Divider(),
                 ListTile(
@@ -1309,6 +1326,284 @@ class ProfileScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class MyAccountScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final prefs = snapshot.data!;
+        final memberName = prefs.getString('member_name') ?? '';
+        final email = prefs.getString('email') ?? '';
+        final phoneNumber = prefs.getString('phone_number') ?? '';
+        final address = prefs.getString('address') ?? '';
+        final age = prefs.getString('age') ?? '';
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('내 계정'),
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+                ),
+                SizedBox(height: 24),
+                _buildInfoCard(
+                  '기본 정보',
+                  [
+                    _buildInfoRow(Icons.person, '이름', memberName),
+                    _buildInfoRow(Icons.email, '이메일', email),
+                    _buildInfoRow(Icons.phone, '전화번호', phoneNumber),
+                    _buildInfoRow(Icons.location_on, '주소', address),
+                    _buildInfoRow(Icons.cake, '나이', '$age세'),
+                  ],
+                ),
+                SizedBox(height: 16),
+                _buildInfoCard(
+                  '멤버십 정보',
+                  [
+                    _buildInfoRow(Icons.fitness_center, '체육관', 'NTB 복싱'),
+                    _buildInfoRow(Icons.calendar_today, '가입일', '2024년 3월 1일'),
+                    _buildInfoRow(Icons.star, '멤버십 등급', '일반 회원'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoCard(String title, List<Widget> children) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Divider(height: 1),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: Colors.grey[600]),
+          SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ChangePasswordScreen extends StatefulWidget {
+  @override
+  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
+}
+
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _changePassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final memberId = prefs.getString('member_id');
+
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/api/mobile/member/change-password'),
+        headers: await getAuthHeaders(),
+        body: json.encode({
+          'memberId': int.parse(memberId!),
+          'currentPassword': _currentPasswordController.text,
+          'newPassword': _newPasswordController.text,
+        }),
+      );
+
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      
+      if (response.statusCode == 200 && data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('비밀번호가 변경되었습니다.')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? '비밀번호 변경에 실패했습니다.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('서버 연결에 실패했습니다.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('비밀번호 변경'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _currentPasswordController,
+                decoration: InputDecoration(
+                  labelText: '현재 비밀번호',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '현재 비밀번호를 입력해주세요';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _newPasswordController,
+                decoration: InputDecoration(
+                  labelText: '새 비밀번호',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '새 비밀번호를 입력해주세요';
+                  }
+                  if (value.length < 8) {
+                    return '비밀번호는 8자 이상이어야 합니다';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: '새 비밀번호 확인',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '새 비밀번호를 다시 입력해주세요';
+                  }
+                  if (value != _newPasswordController.text) {
+                    return '비밀번호가 일치하지 않습니다';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _changePassword,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isLoading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        '비밀번호 변경',
+                        style: TextStyle(fontSize: 18),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 }
 
