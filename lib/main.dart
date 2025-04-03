@@ -583,36 +583,65 @@ class QRCodeScannerPage extends StatefulWidget {
 class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   final MobileScannerController _controller = MobileScannerController();
   String scannedResult = '';
+  bool _isLoading = false;
 
-  // mobile_scanner 6.x에서는 onDetect 콜백이 BarcodeCapture를 인자로 받습니다.
+  Future<void> _checkIn(String qrCode) async {
+    if (!qrCode.contains('manage.ntbc.store')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('올바른 QR 코드가 아닙니다.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final memberId = prefs.getString('member_id');
+      final phoneNumber = prefs.getString('phone_number');
+
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/api/mobile/attendance/check-in'),
+        headers: await getAuthHeaders(),
+        body: json.encode({
+          'memberId': int.parse(memberId!),
+          'phoneNumber': phoneNumber,
+        }),
+      );
+
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      
+      if (response.statusCode == 200 && data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('출석체크가 완료되었습니다.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? '출석체크에 실패했습니다.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('서버 연결에 실패했습니다.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   void _onDetect(BarcodeCapture barcodeCapture) {
-    // 스캔된 바코드 리스트에서 첫 번째 항목 사용
     final Barcode barcode = barcodeCapture.barcodes.first;
     final String code = barcode.rawValue ?? '';
     if (code.isNotEmpty && scannedResult != code) {
       setState(() {
         scannedResult = code;
       });
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('QR 코드 스캔 성공'),
-          content: Text('스캔 결과: $code'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('확인'),
-            ),
-          ],
-        ),
-      );
+      _checkIn(code);
     }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -624,19 +653,16 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       ),
       body: Stack(
         children: [
-          // 카메라 피드 전체 화면
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
           ),
-          // 스캔 영역 외 부분을 어둡게 처리
           Container(
             color: Colors.black54,
             child: CustomPaint(
               painter: ScannerOverlayPainter(),
             ),
           ),
-          // 중앙에 네모 상자 오버레이 (스캔 영역)
           Center(
             child: Container(
               width: 300,
@@ -649,19 +675,28 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
               ),
             ),
           ),
-          // 하단 스캔 결과 안내 텍스트
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.all(20),
               color: Colors.black54,
-              child: Text(
-                scannedResult.isEmpty
-                    ? 'QR 코드를 스캔해주세요'
-                    : '결과: $scannedResult',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-                textAlign: TextAlign.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    scannedResult.isEmpty
+                        ? 'QR 코드를 스캔해주세요'
+                        : '결과: $scannedResult',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (_isLoading)
+                    Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                ],
               ),
             ),
           ),
@@ -1224,7 +1259,12 @@ class ProfileScreen extends StatelessWidget {
                   leading: Icon(Icons.calendar_today, color: Colors.redAccent),
                   title: Text('출석 현황'),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AttendanceHistoryScreen()),
+                    );
+                  },
                 ),
                 Divider(),
                 ListTile(
@@ -1253,6 +1293,116 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class AttendanceHistoryScreen extends StatefulWidget {
+  @override
+  _AttendanceHistoryScreenState createState() => _AttendanceHistoryScreenState();
+}
+
+class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
+  List<Map<String, dynamic>> _attendanceList = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttendanceHistory();
+  }
+
+  Future<void> _loadAttendanceHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final memberId = prefs.getString('member_id');
+      print('회원 ID: $memberId'); // 디버깅 로그
+
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/mobile/attendance/member/$memberId'),
+        headers: await getAuthHeaders(),
+      );
+
+      print('서버 응답: ${response.body}'); // 디버깅 로그
+
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      print('파싱된 데이터: $data'); // 디버깅 로그
+      
+      if (response.statusCode == 200 && data['success'] == true) {
+        final List<dynamic> attendanceData = data['data'];
+        print('출석 데이터: $attendanceData'); // 디버깅 로그
+        
+        setState(() {
+          _attendanceList = attendanceData.map((item) => Map<String, dynamic>.from(item)).toList();
+          _isLoading = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? '출석 기록을 불러오는데 실패했습니다.')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('에러 발생: $e'); // 디버깅 로그
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('서버 연결에 실패했습니다.')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('출석 현황'),
+        centerTitle: true,
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _attendanceList.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        '출석 기록이 없습니다.',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _attendanceList.length,
+                  itemBuilder: (context, index) {
+                    final attendance = _attendanceList[index];
+                    print('출석 항목: $attendance'); // 디버깅 로그
+                    final checkInTime = DateTime.parse(attendance['checkInTime']);
+                    final formattedDate = DateFormat('yyyy년 MM월 dd일 HH:mm').format(checkInTime);
+
+                    return Card(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.red[100],
+                          child: Icon(Icons.check_circle, color: Colors.red),
+                        ),
+                        title: Text(formattedDate),
+                        subtitle: Text(attendance['companyName']),
+                        trailing: Text(attendance['phoneNumber']),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
