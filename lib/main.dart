@@ -1551,21 +1551,17 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final memberId = prefs.getString('member_id');
-      print('회원 ID: $memberId'); // 디버깅 로그
+      print('회원 ID: $memberId');
 
       final response = await http.get(
         Uri.parse('http://localhost:8080/api/mobile/payment/member/$memberId'),
         headers: await getAuthHeaders(),
       );
 
-      print('서버 응답: ${response.body}'); // 디버깅 로그
-
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print('파싱된 데이터: $data'); // 디버깅 로그
       
       if (response.statusCode == 200 && data['success'] == true) {
         final List<dynamic> paymentData = data['data'];
-        print('결제 데이터: $paymentData'); // 디버깅 로그
         
         setState(() {
           _paymentList = paymentData.map((item) => Map<String, dynamic>.from(item)).toList();
@@ -1580,7 +1576,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         });
       }
     } catch (e) {
-      print('에러 발생: $e'); // 디버깅 로그
+      print('에러 발생: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('서버 연결에 실패했습니다.')),
       );
@@ -1590,7 +1586,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     }
   }
 
-  String _formatAmount(int amount) {
+  String _formatAmount(double amount) {
     return '${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원';
   }
 
@@ -1625,63 +1621,117 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   ),
                 )
               : ListView.builder(
+                  padding: EdgeInsets.all(16),
                   itemCount: _paymentList.length,
                   itemBuilder: (context, index) {
                     final payment = _paymentList[index];
-                    print('결제 항목: $payment'); // 디버깅 로그
+                    final isCompleted = payment['paymentCompleted'];
 
-                    return Card(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: payment['paymentCompleted'] 
-                              ? Colors.green[100] 
-                              : Colors.red[100],
-                          child: Icon(
-                            payment['paymentCompleted'] 
-                                ? Icons.check_circle 
-                                : Icons.pending,
-                            color: payment['paymentCompleted'] 
-                                ? Colors.green 
-                                : Colors.red,
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
                           ),
-                        ),
-                        title: Text(_formatAmount(payment['amount'])),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_formatPaymentDate(payment['paymentDate'])),
-                            Text('${payment['numberOfMonths']}개월'),
-                            Text(payment['companyName']),
-                          ],
-                        ),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              payment['paymentCompleted'] ? '결제완료' : '미결제',
-                              style: TextStyle(
-                                color: payment['paymentCompleted'] 
-                                    ? Colors.green 
-                                    : Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isCompleted ? Colors.green[50] : Colors.red[50],
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                             ),
-                            if (payment['paymentDesc'].isNotEmpty)
-                              Text(
-                                payment['paymentDesc'],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: isCompleted ? Colors.green[100] : Colors.red[100],
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isCompleted ? Icons.check_circle : Icons.pending,
+                                    color: isCompleted ? Colors.green : Colors.red,
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _formatAmount(payment['amount']),
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        isCompleted ? '결제완료' : '미결제',
+                                        style: TextStyle(
+                                          color: isCompleted ? Colors.green : Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildInfoRow(Icons.calendar_today, '결제일', _formatPaymentDate(payment['paymentDate'])),
+                                _buildInfoRow(Icons.timer, '결제 기간', '${payment['numberOfMonths']}개월'),
+                                _buildInfoRow(Icons.business, '지점명', payment['companyName']),
+                                if (payment['paymentDesc'].isNotEmpty)
+                                  _buildInfoRow(Icons.description, '결제 설명', payment['paymentDesc']),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
                 ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[600]),
+          SizedBox(width: 12),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
