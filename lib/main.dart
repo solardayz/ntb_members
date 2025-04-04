@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
-import 'package:vibration/vibration.dart';
 import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -77,8 +77,8 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         // 로그인 축하 진동
-        if (await Vibration.hasVibrator() ?? false) {
-          Vibration.vibrate(duration: 100);
+        if (await Vibrate.canVibrate) {
+          Vibrate.vibrate();
         }
 
         // 홈스크린으로 이동
