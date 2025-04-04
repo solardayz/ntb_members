@@ -742,51 +742,56 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('체크인'),
         centerTitle: true,
+        backgroundColor: Colors.redAccent,
       ),
       body: Stack(
         children: [
+          // 📷 카메라 뷰
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
           ),
-          Container(
-            color: Colors.black54,
-            child: CustomPaint(
-              painter: ScannerOverlayPainter(),
-            ),
-          ),
+
+          // 🌫️ 어두운 배경 + 투명 스캔 영역
+          ScannerOverlay(),
+
+          // 📦 QR 프레임
           Center(
             child: Container(
-              width: 300,
-              height: 300,
+              width: 250,
+              height: 250,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.red,
-                  width: 4,
+                  color: Colors.redAccent,
+                  width: 3,
                 ),
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
+
+          // 🧾 하단 정보 영역
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20),
-              color: Colors.black54,
+              padding: EdgeInsets.all(24),
+              margin: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black87.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     scannedResult.isEmpty
-                        ? 'QR 코드를 스캔해주세요'
+                        ? '📷 QR 코드를 스캔해주세요'
                         : '결과: $scannedResult',
                     style: TextStyle(color: Colors.white, fontSize: 18),
                     textAlign: TextAlign.center,
@@ -794,7 +799,9 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                   if (_isLoading)
                     Padding(
                       padding: EdgeInsets.only(top: 16),
-                      child: CircularProgressIndicator(color: Colors.white),
+                      child: CircularProgressIndicator(
+                        color: Colors.redAccent,
+                      ),
                     ),
                 ],
               ),
@@ -804,31 +811,38 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       ),
     );
   }
+
 }
 
-// 스캐너 오버레이를 그리는 CustomPainter 클래스
-class ScannerOverlayPainter extends CustomPainter {
+class ScannerOverlay extends StatelessWidget {
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black54
-      ..style = PaintingStyle.fill;
-
-    // 전체 화면을 어둡게
-    canvas.drawRect(Offset.zero & size, paint);
-
-    // 스캔 영역을 투명하게
-    final scanArea = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2),
-      width: 300,
-      height: 300,
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        return Stack(
+          children: [
+            // 전체 어둡게
+            Container(color: Colors.black.withOpacity(0.5)),
+            // 스캔 영역만 투명하게
+            Positioned(
+              left: (constraints.maxWidth - 250) / 2,
+              top: (constraints.maxHeight - 250) / 2,
+              child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border.all(color: Colors.transparent),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
-    canvas.drawRect(scanArea, Paint()..blendMode = BlendMode.clear);
   }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+
 
 /// 수업(예약) 탭 (예시)
 class ReservationScreen extends StatefulWidget {
