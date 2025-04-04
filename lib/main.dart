@@ -684,8 +684,8 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       final companyId = prefs.getString('companyId');
 
       final response = await http.post(
-        // Uri.parse('https://manage.ntbc.store/api/mobile/attendance/check-in'),
-        Uri.parse('http://localhost:8080/api/mobile/attendance/check-in'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/attendance/check-in'),
+        // Uri.parse('http://192.168.0.237:8080/api/mobile/attendance/check-in'),
         headers: await getAuthHeaders(),
         body: json.encode({
           'memberId': int.parse(memberId!),
@@ -695,8 +695,8 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       );
 
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print("====================");
-      print(data);
+      // print("====================");
+      // print(data);
       if (response.statusCode == 200 && data['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('출석 완료!')),
