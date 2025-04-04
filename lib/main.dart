@@ -109,87 +109,90 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // 로고 또는 타이틀
-                Icon(
-                  Icons.fitness_center,
-                  size: 80,
-                  color: Colors.red,
-                ),
-                SizedBox(height: 32),
-                Text(
-                  'NTB Members',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 로고 또는 타이틀
+                  Icon(
+                    Icons.fitness_center,
+                    size: 80,
+                    color: Colors.red,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 48),
-                // 이메일 입력 필드
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: '이메일',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
+                  SizedBox(height: 32),
+                  Text(
+                    'NTB Members',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '이메일을 입력해주세요';
-                    }
-                    if (!value.contains('@')) {
-                      return '올바른 이메일 형식이 아닙니다';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-                // 비밀번호 입력 필드
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: '비밀번호',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
+                  SizedBox(height: 48),
+                  // 이메일 입력 필드
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: '이메일',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '이메일을 입력해주세요';
+                      }
+                      if (!value.contains('@')) {
+                        return '올바른 이메일 형식이 아닙니다';
+                      }
+                      return null;
+                    },
                   ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '비밀번호를 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 24),
-                // 로그인 버튼
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                  SizedBox(height: 16),
+                  // 비밀번호 입력 필드
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: '비밀번호',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '비밀번호를 입력해주세요';
+                      }
+                      return null;
+                    },
                   ),
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          '로그인',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                ),
-                SizedBox(height: 16),
-                // 비밀번호 찾기 링크
-                TextButton(
-                  onPressed: () {
-                    // TODO: 비밀번호 찾기 화면으로 이동
-                  },
-                  child: Text('비밀번호를 잊으셨나요?'),
-                ),
-              ],
+                  SizedBox(height: 24),
+                  // 로그인 버튼
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            '로그인',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                  ),
+                  SizedBox(height: 16),
+                  // 비밀번호 찾기 링크
+                  TextButton(
+                    onPressed: () {
+                      // TODO: 비밀번호 찾기 화면으로 이동
+                    },
+                    child: Text('비밀번호를 잊으셨나요?'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -283,7 +286,7 @@ class HomeContent extends StatelessWidget {
         return SingleChildScrollView(
           child: Column(
             children: [
-              buildPointBanner(checkedInToday, currentPoint),
+              // buildPointBanner(checkedInToday, currentPoint),
               // 상단 프로필 섹션
               Container(
                 width: double.infinity,
