@@ -49,7 +49,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://manage.ntbc.store/api/mobile/member/login'),
+        // Uri.parse('https://manage.ntbc.store/api/mobile/member/login'),
+        Uri.parse('http://localhost:8080/api/mobile/member/login'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept': 'application/json; charset=UTF-8',
@@ -61,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = json.decode(utf8.decode(response.bodyBytes));
+      print(data);
       if (response.statusCode == 200 && data['token'] != null) {
         // JWT 토큰과 회원 정보 저장
         final prefs = await SharedPreferences.getInstance();
@@ -71,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString('phone_number', data['phoneNumber']);
         await prefs.setString('address', data['address']);
         await prefs.setString('age', data['age'].toString());
+        await prefs.setString('companyId', data['companyId'].toString());
         // 로그인 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('환영합니다, ${data['username']}님!')),
@@ -678,6 +681,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       final prefs = await SharedPreferences.getInstance();
       final memberId = prefs.getString('member_id');
       final phoneNumber = prefs.getString('phone_number');
+      final companyId = prefs.getString('companyId');
 
       final response = await http.post(
         Uri.parse('https://manage.ntbc.store/api/mobile/attendance/check-in'),
@@ -685,6 +689,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
         body: json.encode({
           'memberId': int.parse(memberId!),
           'phoneNumber': phoneNumber,
+          'companyId': companyId,
         }),
       );
 
