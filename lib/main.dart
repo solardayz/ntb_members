@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         // 로그인 축하 진동
-        if (await Vibration.hasVibrator() ?? false) {
+        if (await Vibration.hasVibrator()) {
           Vibration.vibrate();
         }
 
