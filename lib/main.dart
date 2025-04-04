@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
+import 'package:vibration/vibration.dart';
 import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -74,6 +75,11 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('환영합니다, ${data['username']}님!')),
         );
+
+        // 로그인 축하 진동
+        if (await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(duration: 100);
+        }
 
         // 홈스크린으로 이동
         Navigator.of(context).pushReplacement(

@@ -41,6 +41,7 @@ dependencies:
   mobile_scanner: ^3.5.7
 
   intl_translation: ^0.18.0
+  vibration: ^1.7.4
 
 dev_dependencies:
   flutter_test:
