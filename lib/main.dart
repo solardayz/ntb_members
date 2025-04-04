@@ -790,9 +790,11 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    scannedResult.isEmpty
-                        ? '📷 QR 코드를 스캔해주세요'
-                        : '결과: $scannedResult',
+                    _isLoading
+                        ? '출석 처리 중...'
+                        : scannedResult.isNotEmpty
+                        ? '출석 완료!' // 또는 실패 메시지
+                        : '📷 QR 코드를 스캔해주세요',
                     style: TextStyle(color: Colors.white, fontSize: 18),
                     textAlign: TextAlign.center,
                   ),
