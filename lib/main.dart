@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://mange.ntbc.store/api/mobile/member/login'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/member/login'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept': 'application/json; charset=UTF-8',
@@ -678,7 +678,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       final phoneNumber = prefs.getString('phone_number');
 
       final response = await http.post(
-        Uri.parse('http://mange.ntbc.store/api/mobile/attendance/check-in'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/attendance/check-in'),
         headers: await getAuthHeaders(),
         body: json.encode({
           'memberId': int.parse(memberId!),
@@ -1549,7 +1549,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       final memberId = prefs.getString('member_id');
 
       final response = await http.post(
-        Uri.parse('http://mange.ntbc.store/api/mobile/member/change-password'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/member/change-password'),
         headers: await getAuthHeaders(),
         body: json.encode({
           'memberId': int.parse(memberId!),
@@ -1809,7 +1809,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       // print('회원 ID: $memberId'); // 디버깅 로그
 
       final response = await http.get(
-        Uri.parse('http://mange.ntbc.store/api/mobile/attendance/member/$memberId'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/attendance/member/$memberId'),
         headers: await getAuthHeaders(),
       );
 
@@ -1919,7 +1919,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       // print('회원 ID: $memberId');
 
       final response = await http.get(
-        Uri.parse('http://mange.ntbc.store/api/mobile/payment/member/$memberId'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/payment/member/$memberId'),
         headers: await getAuthHeaders(),
       );
 
