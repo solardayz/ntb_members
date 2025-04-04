@@ -670,13 +670,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   bool _isLoading = false;
 
   Future<void> _checkIn(String qrCode) async {
-    if (!qrCode.contains('manage.ntbc.store')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('올바른 QR 코드가 아닙니다.')),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -696,19 +689,23 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       );
 
       final data = json.decode(utf8.decode(response.bodyBytes));
-      
+
       if (response.statusCode == 200 && data['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('출석체크가 완료되었습니다.')),
+          SnackBar(content: Text('출석 완료!')),
         );
+
+        if (await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(); // 기본 진동
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? '출석체크에 실패했습니다.')),
+          SnackBar(content: Text(data['message'] ?? '출석 실패')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('서버 연결에 실패했습니다.')),
+        SnackBar(content: Text('서버 연결 실패')),
       );
     } finally {
       setState(() {
@@ -717,16 +714,28 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
     }
   }
 
+
+
   void _onDetect(BarcodeCapture barcodeCapture) {
     final Barcode barcode = barcodeCapture.barcodes.first;
     final String code = barcode.rawValue ?? '';
+
     if (code.isNotEmpty && scannedResult != code) {
       setState(() {
         scannedResult = code;
       });
-      _checkIn(code);
+
+      if (code.contains("https://manage.ntbc.store/attendance/qr")) {
+        _checkIn(code); // 조건 만족 시 출석 체크
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('올바른 출석 QR코드가 아닙니다.')),
+        );
+      }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
