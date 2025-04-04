@@ -49,8 +49,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        // Uri.parse('https://manage.ntbc.store/api/mobile/member/login'),
-        Uri.parse('http://localhost:8080/api/mobile/member/login'),
+        Uri.parse('https://manage.ntbc.store/api/mobile/member/login'),
+        // Uri.parse('http://localhost:8080/api/mobile/member/login'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept': 'application/json; charset=UTF-8',
@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = json.decode(utf8.decode(response.bodyBytes));
-      print(data);
+
       if (response.statusCode == 200 && data['token'] != null) {
         // JWT 토큰과 회원 정보 저장
         final prefs = await SharedPreferences.getInstance();
